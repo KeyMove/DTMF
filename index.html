@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DTMF按键</title>
+  <style>
+    .key {
+      width: 50px;
+      height: 50px;
+      border: 1px solid black;
+      display: inline-block;
+      margin: 5px;
+      text-align: center;
+      line-height: 50px;
+      cursor: pointer;
+      position: relative; /* 为了绝对定位伪元素而需要 */
+      transition: transform 0.1s; /* 按键按下时平滑过渡效果 */
+    }
+    .in{
+      width: 150px;
+      height: 25px;
+      border: 1px solid black;
+      display: inline-block;
+      margin-left: 5px;
+      text-align: center;
+      position: relative; /* 为了绝对定位伪元素而需要 */
+      transition: transform 0.1s; /* 按键按下时平滑过渡效果 */
+    }
+    .bt{
+      width: 25px;
+      height: 27px;
+      display: inline-block;
+      border: 1px solid black;
+      line-height: 25px;
+      text-align: center;
+      cursor: pointer;
+      position: absolute; 
+    }
+    /* 当按键被按下时的样式 */
+    .key.active {
+      transform: translateY(4px); /* 将按键向下移动 */
+    }
+
+    .floatplay{
+      width: 50px;
+      height: 50px;
+      position: fixed;
+      right: 2em;
+      bottom: 2em;
+
+    }
+
+    .mainpanel{
+      width: 195px;
+      height: 276px;
+      position: absolute;
+      background: #55a9ff;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%,-50%);
+    }
+
+    
+  </style>
+</head>
+<body>
+  <div class="mainpanel">
+
+    <div><input type="text" class="in" name="inputtext" id="inputvalue"><div class="bt" onclick="clearplay()">×</div></div>
+    <div id="1" class="key">1</div>
+    <div id="2" class="key">2</div>
+    <div id="3" class="key">3</div><br>
+    <div id="4" class="key">4</div>
+    <div id="5" class="key">5</div>
+    <div id="6" class="key">6</div><br>
+    <div id="7" class="key">7</div>
+    <div id="8" class="key">8</div>
+    <div id="9" class="key">9</div><br>
+    <div id="*" class="key">*</div>
+    <div id="0" class="key">0</div>
+    <div id="#" class="key">#</div>
+    <!-- <div><img src="/video_stream" style="width: 320px;height: 240px;"/></div> -->
+  </div>
+ 
+  <div class="floatplay"></div>
+  <script>
+    // 创建一个新的AudioContext实例，用于处理音频
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const playtext=document.getElementById('inputvalue')
+ 
+    // 播放特定频率的声音
+    function playSound(frequency) {
+      const oscillator = audioContext.createOscillator();
+      oscillator.type = 'sine'; // 选择波形类型，这里是正弦波
+      oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime); // 设置频率
+      oscillator.connect(audioContext.destination); // 连接到音频输出
+      oscillator.start(); // 开始播放
+      oscillator.stop(audioContext.currentTime + 0.3); // 0.3秒后停止播放
+    }
+
+    function playSound2(f1,f2) {
+      const oscillator = audioContext.createOscillator();
+      oscillator.type = 'sine'; // 选择波形类型，这里是正弦波
+      oscillator.frequency.setValueAtTime(f1, audioContext.currentTime); // 设置频率
+      
+      const oscillator2 = audioContext.createOscillator();
+      oscillator2.type = 'sine'; // 选择波形类型，这里是正弦波
+      oscillator2.frequency.setValueAtTime(f2, audioContext.currentTime); // 设置频率
+      oscillator2.connect(audioContext.destination); // 连接到音频输出
+      oscillator.connect(audioContext.destination); // 连接到音频输出
+
+      oscillator.start(); // 开始播放
+      oscillator2.start(); // 开始播放
+
+      oscillator.stop(audioContext.currentTime + 0.3); // 0.3秒后停止播放
+      oscillator2.stop(audioContext.currentTime + 0.3); // 0.3秒后停止播放 
+    }
+ 
+    // 获取所有的琴键元素
+    const keys = document.querySelectorAll('.key');
+    keys.forEach(key => {
+      // 为每个琴键添加鼠标点击事件
+      key.addEventListener('click', () => {
+        playtext.value+=key.textContent;
+        playNote(key.textContent); // 播放琴键对应的音符
+        animatePress(key); // 触发按键动画效果
+      });
+    });
+ 
+    // 监听键盘按下事件
+    document.addEventListener('keydown', (event) => {
+      const keyName = event.key.toUpperCase(); // 获取按键名并转为大写
+      const keyElement = document.getElementById(keyName); // 获取对应的琴键元素
+      if (keyElement) {
+        playtext.value+=keyName;
+        playNote(keyName); // 播放琴键对应的音符
+        animatePress(keyElement); // 触发按键动画效果
+      }
+    });
+ 
+    // 触发琴键按下的动画效果
+    function animatePress(keyElement) {
+      keyElement.classList.add('active'); // 添加按下状态的样式类
+      setTimeout(() => {
+        keyElement.classList.remove('active'); // 在100毫秒后移除按下状态的样式类
+      }, 100); // 这个时间应该与CSS中的过渡时间一致
+    }
+ 
+    // 根据音符播放声音
+    function playNote(note) { 
+      let fmap={
+        '1':[697,1209],
+        '2':[697,1336],
+        '3':[697,1477],
+        '4':[770,1209],
+        '5':[770,1336],
+        '6':[770,1477],
+        '7':[852,1209],
+        '8':[852,1336],
+        '9':[852,1477],
+        '*':[941,1209],
+        '0':[941,1336],
+        '#':[941,1477],
+    };
+    if(fmap[note]==null)return;
+    
+      playSound2(fmap[note][0],fmap[note][1]); // 调用函数播放声音
+    }
+    function clearplay(){
+      playtext.value="";
+    }
+
+    function initsty() {
+            let style = document.createElement('style');
+            style.type = 'text/css';
+            style.appendChild(document.createTextNode(`.play{
+              position: absolute;
+              right: 30px;
+              top: 20px;
+              width: 3em;
+              height: 3em;
+              overflow: hidden;
+              background-color: #506882;
+              border-radius: 5px;
+              transition: .3s;
+            }
+            .play:hover{
+              background-color: #6585a8;
+            }
+            .icon_play::before{
+                position: relative;
+                float: right;
+                content: "";
+                display: block;
+                right: 1.3em;
+                top: 1.1em;
+                width: 0px;
+                height: 0px;
+                border-right: 6px solid #FFF;
+                border-bottom: 6px solid transparent;
+                border-left: 6px solid transparent;
+                border-top: 6px solid #FFF;
+                transform: rotateZ(45deg);
+            }
+            .icon_loading {
+                position: relative;
+                float: right;
+                width: 1.8em;
+                height: 1.8em;
+                right: 0.3em;
+                top: 0.3em;
+                border: 5px solid #FFF;
+                border-radius: 50%;
+                border-top: 5px solid #000;
+                animation: spin 1s linear infinite;
+            }
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }`));
+            document.head.appendChild(style);
+        }
+        function addplay(div,click) {
+            let val = document.createElement("div");
+            val.innerHTML = "<span class='icon_play'></span>";
+            val.className = "play";
+            let play = val.children[0];
+            val.onclick = function () {
+                play.classList.toggle("icon_play");
+                play.classList.toggle("icon_loading");
+                if(click!=null&&!play.classList.contains('icon_play'))click(val,function(){if(!play.classList.contains('icon_play')){play.classList.toggle("icon_play");play.classList.toggle("icon_loading");}});
+            }
+            div.appendChild(val);
+            return val;
+        }
+
+        onload=()=>{
+          initsty();
+          addplay(document.querySelector('.floatplay'),(p,b)=>{
+            let i=0;
+            for(let i=0;i<playtext.value.length;i++){
+              setTimeout(()=>{
+                let val=playtext.value[i];
+                playNote(val);
+              },i*400);
+            }
+            setTimeout(()=>b(),playtext.value.length*400+400)
+          });
+        }
+  </script>
+</body>
+</html>
