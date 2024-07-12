@@ -3,4 +3,6 @@
 ## 麦克风电路
 <img src="https://github.com/KeyMove/DTMF/blob/main/gif/1.png?raw=true"/><br>
 ## 实际运行效果
+### 硬件平台<br>
+py32f002a 24MHz 4K/32K<br>
 <img src="https://github.com/KeyMove/DTMF/blob/main/gif/2.gif?raw=true"/>
